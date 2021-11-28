@@ -1,5 +1,4 @@
 # Util
-import json
 import random
 import time
 
@@ -10,6 +9,9 @@ import matplotlib.animation
 # Visualization
 import matplotlib.pyplot as plt
 import IPython
+
+# Server
+import client
 
 VALID_MOVES = {
     'RIGHT': (0, 1),
@@ -68,6 +70,12 @@ class Interseccion(ap.Model):
         self.grid.add_agents(self.new_car, position)
         self.car_count += 1
 
+        # Add to database
+        car = list(self.new_car)[0]
+        car_id = car.id
+        position = self.grid.positions[car]
+        self.client.add_car(car_id, position)
+
     def check_car_horizontal(self):
         started = False
         for neighbor in self.grid.neighbors(self.semaforos[0]):
@@ -118,6 +126,13 @@ class Interseccion(ap.Model):
         self.step_count = 0
         self.car_count = 0
         # self.duracion_semaforo = self.p.duracion_semaforo
+
+        # Conexión al servidor
+        remote_server = input("¿Desea conectar con un servidor remoto?  [y]yes / [n]no: ")
+        url = None
+        if remote_server == 'y':
+            url = input("Dir. IP: ")
+        self.client = client.Client(url)
 
     def step(self):
         if self.car_count < self.p.n_cars:
@@ -182,8 +197,11 @@ class Interseccion(ap.Model):
 
         self.step_count += 1
 
+        time.sleep(1)
+
     def end(self):
-        pass
+        for agent in self.grid.agents:
+            self.client.delete_car(agent.id)
 
 
 def animation_plot(model, ax):
@@ -197,13 +215,18 @@ def animation_plot(model, ax):
 parameters = {
     'size': 20,
     'n_cars': 8,
-    'time': 100,
+    'time': 30,
     'step_dur': 1,
     'duracion_semaforo': 5
 }
 
-fig, ax = plt.subplots()
+
+"""fig, ax = plt.subplots()
 model = Interseccion(parameters)
 animation = ap.animate(model, fig, ax, animation_plot)
 IPython.display.HTML(animation.to_jshtml(fps=8))
+"""
 
+if __name__ == "__main__":
+    model = Interseccion(parameters)
+    model.run()

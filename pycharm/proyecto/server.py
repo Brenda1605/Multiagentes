@@ -33,7 +33,7 @@ class MyHandler(BaseHTTPRequestHandler):
         self._set_response()
         if action == 'add':
             obj_id = db.add_car(post_data_json['x'], post_data_json['y'], post_data_json['z'], post_data_json['id'])
-            res = {'id': obj_id, 'message': 'New car added, id: ' + obj_id}
+            res = {'id': obj_id, 'message': 'New car added, id: ' + str(obj_id)}
             self.wfile.write(bytes(json.dumps(res), 'utf-8'))
         elif action == 'update':
             db.update_car(post_data_json['id'], post_data_json['x'], post_data_json['y'], post_data_json['z'])
