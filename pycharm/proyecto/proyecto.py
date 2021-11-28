@@ -1,6 +1,7 @@
 # Util
 import json
 import random
+import time
 
 # Model
 import agentpy as ap
@@ -9,11 +10,6 @@ import matplotlib.animation
 # Visualization
 import matplotlib.pyplot as plt
 import IPython
-
-# server
-from http.server import HTTPServer, BaseHTTPRequestHandler
-import threading
-import web
 
 VALID_MOVES = {
     'RIGHT': (0, 1),
@@ -26,46 +22,6 @@ GREEN = 1
 YELLOW = 2
 RED = 3
 BLUE = 4
-
-#
-# response = """{
-#                 \"data\": [
-#                     {\"id\":0, \"x\":0, \"y\":1, \"z\":0},
-#                     {\"id\":1, \"x\":3, \"y\":4, \"z\":0},
-#                     {\"id\":2, \"x\":6, \"y\":7, \"z\":0}
-#                 ]
-#             }"""
-
-response = {
-    "data": [{"id": 0, "x": 100, "y": 100, "z": 0}]
-}
-
-
-class MyHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        global response
-        # send 200 response
-        self.send_response(200)
-        # send response headers
-        self.end_headers()
-        # send the body of the response
-        self.wfile.write(bytes(json.dumps(response), "utf-8"))
-
-
-class MyWebserver(threading.Thread):
-    def run (self):
-        urls = ('/', 'MyWebserver')
-        app = web.application(urls, globals())
-        app.run()
-
-    def GET(self):
-        global response
-        # send 200 response
-        self.send_response(200)
-        # send response headers
-        self.end_headers()
-        # send the body of the response
-        self.wfile.write(bytes(json.dumps(response), "utf-8"))
 
 
 class Car(ap.Agent):
@@ -91,7 +47,6 @@ class TrafficLight(ap.Agent):
 
 
 class Interseccion(ap.Model):
-    global response
 
     def add_car(self):
         self.new_car = ap.AgentList(self, 1, Car)
@@ -112,14 +67,6 @@ class Interseccion(ap.Model):
 
         self.grid.add_agents(self.new_car, position)
         self.car_count += 1
-
-    def update_car(self, id, x, y):
-        global response
-        cars_data = response['data']
-        for car in cars_data:
-            if car['id'] == id:
-                car['x'] = x
-                car['y'] = y
 
     def check_car_horizontal(self):
         started = False
@@ -149,9 +96,6 @@ class Interseccion(ap.Model):
         return started
 
     def setup(self):
-        self.update_car(0, 1, 1)
-
-
         # Create streets
         street_length = self.street_length = self.p.size
         self.h_pos = street_length // 3
@@ -254,16 +198,12 @@ parameters = {
     'size': 20,
     'n_cars': 8,
     'time': 100,
+    'step_dur': 1,
     'duracion_semaforo': 5
 }
 
-
-# fig, ax = plt.subplots()
+fig, ax = plt.subplots()
 model = Interseccion(parameters)
-# animation = ap.animate(model, fig, ax, animation_plot)
-# IPython.display.HTML(animation.to_jshtml(fps=8))
-
-# model.run()
-
-MyWebserver().start()
+animation = ap.animate(model, fig, ax, animation_plot)
+IPython.display.HTML(animation.to_jshtml(fps=8))
 
