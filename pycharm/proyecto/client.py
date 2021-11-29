@@ -49,6 +49,42 @@ class Client:
 
         return r.status_code
 
+    def add_traffic_light(self, id, color, tag):
+        data = {
+            'action': 'add_tf',
+            'id': id,
+            'color': color,
+            'tag': tag
+        }
+        r = req.post(self.url, data=json.dumps(data))
+        r_obj = r.json()
+        print(r_obj['message'])
+
+        return r.status_code
+
+    def update_traffic_light(self, id, color):
+        data = {
+            'action': 'update_tf',
+            'id': id,
+            'color': color
+        }
+
+        r = req.post(self.url, data=json.dumps(data))
+        print(r.text)
+
+        return r.status_code
+
+    def delete_traffic_light(self, id):
+        data = {
+            'action': 'delete_tf',
+            'id': id
+        }
+
+        r = req.post(self.url, data=json.dumps(data))
+        print(r.text)
+
+        return r.status_code
+
 
 if __name__ == "__main__":
     remote_server = input("¿Desea conectar con un servidor remoto?  [y]yes / [n]no: ")

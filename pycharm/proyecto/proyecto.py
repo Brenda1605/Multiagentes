@@ -25,6 +25,13 @@ YELLOW = 2
 RED = 3
 BLUE = 4
 
+COLOR_STRINGS = {
+    GREEN: 'GREEN',
+    YELLOW: 'YELLOW',
+    RED: 'RED',
+    BLUE: 'BLUE'
+}
+
 
 class Car(ap.Agent):
     def setup(self):
@@ -82,11 +89,15 @@ class Interseccion(ap.Model):
             semaforo_pos = self.grid.positions[self.semaforos[0]]
             if self.grid.positions[neighbor][1] == semaforo_pos[1] - 1:
                 self.semaforos[0].color = GREEN
+                self.client.update_traffic_light(self.semaforos[0].id, COLOR_STRINGS[self.semaforos[0].color])
                 self.semaforos[2].color = GREEN
+                self.client.update_traffic_light(self.semaforos[2].id, COLOR_STRINGS[self.semaforos[2].color])
                 self.duracion_semaforo = self.p.duracion_semaforo
                 started = True
                 self.semaforos[1].color = RED
+                self.client.update_traffic_light(self.semaforos[1].id, COLOR_STRINGS[self.semaforos[1].color])
                 self.semaforos[3].color = RED
+                self.client.update_traffic_light(self.semaforos[3].id, COLOR_STRINGS[self.semaforos[3].color])
         return started
 
     def check_car_vertical(self):
@@ -95,15 +106,26 @@ class Interseccion(ap.Model):
             semaforo_pos = self.grid.positions[self.semaforos[1]]
             if self.grid.positions[neighbor][0] == semaforo_pos[0] - 1:
                 self.semaforos[1].color = GREEN
+                self.client.update_traffic_light(self.semaforos[1].id, COLOR_STRINGS[self.semaforos[1].color])
                 self.semaforos[3].color = GREEN
+                self.client.update_traffic_light(self.semaforos[3].id, COLOR_STRINGS[self.semaforos[3].color])
                 self.duracion_semaforo = self.p.duracion_semaforo
                 started = True
                 self.semaforos[0].color = RED
+                self.client.update_traffic_light(self.semaforos[0].id, COLOR_STRINGS[self.semaforos[0].color])
                 self.semaforos[2].color = RED
+                self.client.update_traffic_light(self.semaforos[2].id, COLOR_STRINGS[self.semaforos[2].color])
 
         return started
 
     def setup(self):
+        # Conexión al servidor
+        remote_server = input("¿Desea conectar con un servidor remoto?  [y]yes / [n]no: ")
+        url = None
+        if remote_server == 'y':
+            url = input("Dir. IP: ")
+        self.client = client.Client(url)
+
         # Create streets
         street_length = self.street_length = self.p.size
         self.h_pos = street_length // 3
@@ -115,11 +137,18 @@ class Interseccion(ap.Model):
         self.status_semaforos = False
         posiciones_semaforos = [(self.v_pos, self.h_pos - 1), (self.v_pos - 1, self.h_pos),
                                 (self.v_pos, 2 * self.h_pos - 1), (self.v_pos - 1, 2 * self.h_pos)]
+        nombres_semaforos = ['A', 'B', 'C', 'D']
+
         # semaforos[0]: horizontal
         # semaforos[1]: vertical
 
+        i = 0
+        for semaforo in self.semaforos:
+            self.client.add_traffic_light(semaforo.id, COLOR_STRINGS[semaforo.color], nombres_semaforos[i])
+            i += 1
+
         # Create grid (calles)
-        self.grid = ap.Grid(self, (self.p.size, self.p.size), torus=True, track_empty=True)
+        self.grid = ap.Grid(self, (self.p.size, self.p.size), track_empty=True)
         self.grid.add_agents(self.semaforos, posiciones_semaforos)
 
         # Counters
@@ -127,12 +156,6 @@ class Interseccion(ap.Model):
         self.car_count = 0
         # self.duracion_semaforo = self.p.duracion_semaforo
 
-        # Conexión al servidor
-        remote_server = input("¿Desea conectar con un servidor remoto?  [y]yes / [n]no: ")
-        url = None
-        if remote_server == 'y':
-            url = input("Dir. IP: ")
-        self.client = client.Client(url)
 
     def step(self):
         if self.car_count < self.p.n_cars:
@@ -157,16 +180,28 @@ class Interseccion(ap.Model):
             if self.duracion_semaforo == 0:
                 if not self.check_car_vertical():
                     self.semaforos[0].color = YELLOW
+                    self.client.update_traffic_light(self.semaforos[0].id, COLOR_STRINGS[self.semaforos[0].color])
                     self.semaforos[1].color = YELLOW
+                    self.client.update_traffic_light(self.semaforos[1].id, COLOR_STRINGS[self.semaforos[1].color])
+                    self.semaforos[2].color = YELLOW
+                    self.client.update_traffic_light(self.semaforos[2].id, COLOR_STRINGS[self.semaforos[2].color])
+                    self.semaforos[3].color = YELLOW
+                    self.client.update_traffic_light(self.semaforos[3].id, COLOR_STRINGS[self.semaforos[3].color])
 
         elif self.semaforos[1].color == GREEN:
             self.duracion_semaforo -= 1
             if self.duracion_semaforo == 0:
                 if not self.check_car_horizontal():
                     self.semaforos[0].color = YELLOW
+                    self.client.update_traffic_light(self.semaforos[0].id, COLOR_STRINGS[self.semaforos[0].color])
                     self.semaforos[1].color = YELLOW
+                    self.client.update_traffic_light(self.semaforos[1].id, COLOR_STRINGS[self.semaforos[1].color])
+                    self.semaforos[2].color = YELLOW
+                    self.client.update_traffic_light(self.semaforos[2].id, COLOR_STRINGS[self.semaforos[2].color])
+                    self.semaforos[3].color = YELLOW
+                    self.client.update_traffic_light(self.semaforos[3].id, COLOR_STRINGS[self.semaforos[3].color])
 
-        for agent in self.grid.agents:
+        for agent in list(self.grid.agents):
             agent_pos = self.grid.positions[agent]
             move = True
             if agent.type == 'CAR':
@@ -185,12 +220,15 @@ class Interseccion(ap.Model):
                                 move = False
                                 break
                 if move:
-                    '''
-                    if self.grid.positions[agent] == (self.v_pos, self.street_length-1) or \
-                        self.grid.positions[agent] == (self.street_length-1, self.h_pos):
-                        self.grid.remove_agents(ap.AgentList(self, agent))
-                    '''
+
                     self.grid.move_by(agent, agent.get_dir())
+                    new_pos = self.grid.positions[agent]
+                    self.client.update_car(agent.id, new_pos)
+
+                if (self.grid.positions[agent] == (self.v_pos, self.h_pos * 2 - 1) or self.grid.positions[agent] == (
+                self.v_pos * 2 - 1, self.h_pos)):
+                    self.grid.remove_agents(agent)
+                    self.client.delete_car(agent.id)
 
         if self.p.time == self.step_count:
             self.stop()
@@ -202,6 +240,7 @@ class Interseccion(ap.Model):
     def end(self):
         for agent in self.grid.agents:
             self.client.delete_car(agent.id)
+            self.client.delete_traffic_light(agent.id)
 
 
 def animation_plot(model, ax):
@@ -215,8 +254,8 @@ def animation_plot(model, ax):
 parameters = {
     'size': 20,
     'n_cars': 8,
-    'time': 30,
-    'step_dur': 1,
+    'time': 40,
+    'step_dur': 0.5,
     'duracion_semaforo': 5
 }
 

@@ -39,6 +39,14 @@ class MyHandler(BaseHTTPRequestHandler):
             db.update_car(post_data_json['id'], post_data_json['x'], post_data_json['y'], post_data_json['z'])
         elif action == 'delete':
             db.delete_car(post_data_json['id'])
+        elif action == 'add_tf':
+            obj_id = db.add_traffic_light(post_data_json['id'], post_data_json['color'], post_data_json['tag'])
+            res = {'id': obj_id, 'message': 'New car added, id: ' + str(obj_id)}
+            self.wfile.write(bytes(json.dumps(res), 'utf-8'))
+        elif action == 'update_tf':
+            db.update_traffic_light(post_data_json['id'], post_data_json['color'])
+        elif action == 'delete_tf':
+            db.delete_traffic_light(post_data_json['id'])
 
 
 def run():
