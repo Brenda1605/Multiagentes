@@ -37,8 +37,13 @@
   </PropertyGroup>
   <ItemGroup>
      <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
-     <Compile Include="Assets\Scripts\SimpleCameraController.cs" />
      <Compile Include="Assets\Scripts\CarMovement.cs" />
+     <Compile Include="Assets\Scripts\SimpleCameraController.cs" />
+     <Compile Include="Assets\Scripts\GameController.cs" />
+     <Compile Include="Assets\Scripts\Data.cs" />
+     <Compile Include="Assets\Scripts\Position.cs" />
+     <Compile Include="Assets\Scripts\Requesting.cs" />
+     <Compile Include="Assets\Scripts\Semaforo.cs" />
     <Reference Include="UnityEngine">
         <HintPath>C:\Program Files\Unity\Hub\Editor\2020.3.21f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>

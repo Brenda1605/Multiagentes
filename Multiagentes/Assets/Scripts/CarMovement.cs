@@ -5,18 +5,16 @@ using UnityEngine.AI;
 
 public class CarMovement : MonoBehaviour
 {
-    NavMeshAgent car;
-    public Transform object;
+    [SerializeField] private NavMeshAgent carMesh;
+    public Vector3 dest;
+    public int id;
 
-    // Start is called before the first frame update
     void Start()
     {
-        car = GetComponent<NavMeshAgent>();
     }
 
-    void Update()
-    {
-        car.destination = object.position;
+    void Update() {
+        transform.position = Vector3.MoveTowards(transform.position, dest, Time.deltaTime);
     }
 }
 
