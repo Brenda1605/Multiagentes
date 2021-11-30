@@ -1,0 +1,19 @@
+
+/* Reset border-box */
+html {
+  box-sizing: border-box;
+  background-color: black;
+  color: white;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+/* layout */
+body {
+  padding: 20px;
+}
+
