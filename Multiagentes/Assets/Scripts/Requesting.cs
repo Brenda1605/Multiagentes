@@ -13,10 +13,46 @@ public class Requesting : MonoBehaviour
     private Hashtable carsHT;
     private Data d;
     private GameObject newCar;
+    private float luzVerde;
+    private float luzAmarilla;
+    private float luzRoja;
     private HashSet<int> existingCars = new HashSet<int>();
+    [SerializeField] private GameObject[] trafficLights;
 
     void Start() {
         StartCoroutine(Wait());
+    }
+
+    void UpdateTrafficLights(){
+        int i = 0;
+        foreach(Semaforo s in d.trafficLights){
+            if(s.color == "GREEN"){
+                GreenLight(i);
+            } else if (s.color == "YELLOW"){
+                YellowLight(i);
+            }else{
+                RedLight(i);
+            }
+            i++;
+        }
+    }
+
+    void GreenLight(int i){
+        trafficLights[i].transform.Find("GREEN").GetComponent<Light>().intensity = 2;
+        trafficLights[i].transform.Find("YELLOW").GetComponent<Light>().intensity = 0;
+        trafficLights[i].transform.Find("RED").GetComponent<Light>().intensity = 0;
+    }
+
+    void YellowLight(int i){
+        trafficLights[i].transform.Find("YELLOW").GetComponent<Light>().intensity = 2;
+        trafficLights[i].transform.Find("GREEN").GetComponent<Light>().intensity = 0;
+        trafficLights[i].transform.Find("RED").GetComponent<Light>().intensity = 0;
+    }
+
+    void RedLight(int i){
+        trafficLights[i].transform.Find("RED").GetComponent<Light>().intensity = 2;
+        trafficLights[i].transform.Find("GREEN").GetComponent<Light>().intensity = 0;
+        trafficLights[i].transform.Find("YELLOW").GetComponent<Light>().intensity = 0;
     }
 
     void CompareCars() {
@@ -63,12 +99,13 @@ public class Requesting : MonoBehaviour
 
     IEnumerator Wait() {
         while(true){
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.3f);
             StartCoroutine(GetPositions());
         }
     }
  
     IEnumerator GetPositions() {
+        // get data
         UnityWebRequest www = UnityWebRequest.Get("https://testappagent.us-south.cf.appdomain.cloud/");
         yield return www.SendWebRequest();
  
@@ -77,11 +114,12 @@ public class Requesting : MonoBehaviour
         }
         else {
             // Show results as text
-            Debug.Log(www.downloadHandler.text);
+            //Debug.Log(www.downloadHandler.text);
         }
 
         d = JsonUtility.FromJson<Data>(www.downloadHandler.text);
 
+        UpdateTrafficLights();
         CompareCars();
         FindDeletions();
     }

@@ -7,5 +7,5 @@ using System;
 public class Data
 {
     public Position[] cars;
-    public Semaforo[] trafficLight;
+    public Semaforo[] trafficLights;
 }
