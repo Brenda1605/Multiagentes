@@ -20,26 +20,6 @@ public class Requesting : MonoBehaviour
     }
 
     void CompareCars() {
-        /*
-        foreach(DictionaryEntry de in carsHT)
-            Console.WriteLine("Key: {0}, Value: {1}", de.Key, de.Value);
-
-        foreach(Position p in d.cars){
-            if (carsHT.ContainsKey(p.id)) {
-                int index = FindCar(p.id);
-                if (index != -1) {
-                    carMovement = cars[index].GetComponent<CarMovement>();
-                    carMovement.transform.position = new Vector3(p.x*10f, p.z+1.3f, p.y*10f);
-                }
-            } else {
-                carsHT.Add(p.id, p);
-                newCar = Instantiate(carPrefab, new Vector3(p.x*10f, p.z+1.3f, p.y*10f), Quaternion.identity);
-                carMovement = newCar.GetComponent<CarMovement>();
-                carMovement.id = p.id;
-                cars.Add(newCar);
-            }
-        }
-        */
         foreach(Position p in d.cars) {
             if (existingCars.Contains(p.id)) {
                 GameObject car = FindCar(p.id);
@@ -51,6 +31,22 @@ public class Requesting : MonoBehaviour
                 carMovement.id = p.id;
                 existingCars.Add(p.id);
                 newCar.transform.parent = carGroup.transform;
+            }
+        }
+    }
+
+    void FindDeletions() {
+        bool existe;
+        foreach(Transform car in carGroup.transform) {
+            existe = false;
+            foreach(Position p in d.cars) {
+                if (car.GetComponent<CarMovement>().id == p.id) {
+                    existe = true;
+                    break;
+                }
+            }
+            if(existe == false){
+                car.gameObject.SetActive(false);
             }
         }
     }
@@ -67,13 +63,13 @@ public class Requesting : MonoBehaviour
 
     IEnumerator Wait() {
         while(true){
+            yield return new WaitForSeconds(0.5f);
             StartCoroutine(GetPositions());
-            yield return new WaitForSeconds(1);
         }
     }
  
     IEnumerator GetPositions() {
-        UnityWebRequest www = UnityWebRequest.Get("https://2f1f-177-241-41-205.ngrok.io");
+        UnityWebRequest www = UnityWebRequest.Get("https://testappagent.us-south.cf.appdomain.cloud/");
         yield return www.SendWebRequest();
  
         if (www.result != UnityWebRequest.Result.Success) {
@@ -87,5 +83,6 @@ public class Requesting : MonoBehaviour
         d = JsonUtility.FromJson<Data>(www.downloadHandler.text);
 
         CompareCars();
+        FindDeletions();
     }
 }
