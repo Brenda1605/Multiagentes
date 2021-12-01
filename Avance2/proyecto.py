@@ -95,7 +95,7 @@ class Interseccion(ap.Model):
                 self.duracion_semaforo = self.p.duracion_semaforo
                 self.duracion_semaforo2 = self.p.duracion_semaforo
                 started = True
-          
+
         return started
 
     def check_car_vertical(self, a, b):
@@ -110,14 +110,13 @@ class Interseccion(ap.Model):
                 self.duracion_semaforo = self.p.duracion_semaforo
                 self.duracion_semaforo2 = self.p.duracion_semaforo
                 started = True
-     
 
         return started
 
     def setup(self):
 
         self.client = client.Client("https://testappagent.us-south.cf.appdomain.cloud/")
-        
+
         # Create streets
         street_length = self.street_length = self.p.size
         self.h_pos = street_length // 3
@@ -148,7 +147,6 @@ class Interseccion(ap.Model):
         self.car_count = 0
         # self.duracion_semaforo = self.p.duracion_semaforo
 
-
     def step(self):
         if self.car_count < self.p.n_cars:
             self.add_car()
@@ -162,51 +160,50 @@ class Interseccion(ap.Model):
                 no: los dos amarillos
         """
         if self.semaforos[0].color == YELLOW and self.semaforos[1].color == YELLOW:
-            started = self.check_car_horizontal(0,1)
+            started = self.check_car_horizontal(0, 1)
             if not started:
-                started = self.check_car_vertical(0,1)
-        
+                started = self.check_car_vertical(0, 1)
+
         elif self.semaforos[0].color == GREEN:
             self.duracion_semaforo -= 1
             if self.duracion_semaforo == 0:
-                if not self.check_car_vertical(0,1):
-                    self.semaforos[0].color = YELLOW
-                    self.client.update_traffic_light(self.semaforos[0].id, COLOR_STRINGS[self.semaforos[0].color])
-                    self.semaforos[1].color = YELLOW  
-                    self.client.update_traffic_light(self.semaforos[1].id, COLOR_STRINGS[self.semaforos[1].color])              
-
-        elif self.semaforos[1].color == GREEN:
-            self.duracion_semaforo -= 1
-            if self.duracion_semaforo == 0:
-                if not self.check_car_horizontal(0,1):
+                if not self.check_car_vertical(0, 1):
                     self.semaforos[0].color = YELLOW
                     self.client.update_traffic_light(self.semaforos[0].id, COLOR_STRINGS[self.semaforos[0].color])
                     self.semaforos[1].color = YELLOW
                     self.client.update_traffic_light(self.semaforos[1].id, COLOR_STRINGS[self.semaforos[1].color])
-        
+
+        elif self.semaforos[1].color == GREEN:
+            self.duracion_semaforo -= 1
+            if self.duracion_semaforo == 0:
+                if not self.check_car_horizontal(0, 1):
+                    self.semaforos[0].color = YELLOW
+                    self.client.update_traffic_light(self.semaforos[0].id, COLOR_STRINGS[self.semaforos[0].color])
+                    self.semaforos[1].color = YELLOW
+                    self.client.update_traffic_light(self.semaforos[1].id, COLOR_STRINGS[self.semaforos[1].color])
+
         if self.semaforos[2].color == YELLOW and self.semaforos[3].color == YELLOW:
-            started = self.check_car_horizontal(2,3)
+            started = self.check_car_horizontal(2, 3)
             if not started:
-                started = self.check_car_vertical(2,3)
+                started = self.check_car_vertical(2, 3)
 
         elif self.semaforos[2].color == GREEN:
             self.duracion_semaforo2 -= 1
             if self.duracion_semaforo2 == 0:
-                if not self.check_car_vertical(2,3):
+                if not self.check_car_vertical(2, 3):
                     self.semaforos[2].color = YELLOW
                     self.client.update_traffic_light(self.semaforos[2].id, COLOR_STRINGS[self.semaforos[2].color])
                     self.semaforos[3].color = YELLOW
                     self.client.update_traffic_light(self.semaforos[3].id, COLOR_STRINGS[self.semaforos[3].color])
-        
+
         elif self.semaforos[3].color == GREEN:
             self.duracion_semaforo2 -= 1
             if self.duracion_semaforo2 == 0:
-                if not self.check_car_vertical(2,3):
+                if not self.check_car_vertical(2, 3):
                     self.semaforos[2].color = YELLOW
                     self.client.update_traffic_light(self.semaforos[2].id, COLOR_STRINGS[self.semaforos[2].color])
                     self.semaforos[3].color = YELLOW
                     self.client.update_traffic_light(self.semaforos[3].id, COLOR_STRINGS[self.semaforos[3].color])
-                   
 
         for agent in list(self.grid.agents):
             agent_pos = self.grid.positions[agent]
@@ -227,25 +224,25 @@ class Interseccion(ap.Model):
                                 move = False
                                 break
                 if move:
-
                     self.grid.move_by(agent, agent.get_dir())
                     new_pos = self.grid.positions[agent]
                     self.client.update_car(agent.id, new_pos)
-             
 
                 if (self.grid.positions[agent] == (self.v_pos, self.p.size - 1) or self.grid.positions[agent] == (
-                self.p.size- 1, self.h_pos) or self.grid.positions[agent] == (
-                self.p.size - 1, self.h_pos*2)):
+                        self.p.size - 1, self.h_pos) or self.grid.positions[agent] == (
+                        self.p.size - 1, self.h_pos * 2)):
                     self.grid.remove_agents(agent)
                     self.client.delete_car(agent.id)
-             
 
         if self.p.time == self.step_count:
             self.stop()
 
+        # upload changes to cloud
+        self.client.commit()
+
         self.step_count += 1
 
-        time.sleep(1)
+        time.sleep(self.p.step_dur)
 
     def end(self):
         for agent in self.grid.agents:
@@ -265,7 +262,7 @@ parameters = {
     'size': 20,
     'n_cars': 8,
     'time': 40,
-    'step_dur': 0.3,
+    'step_dur': 0.1,
     'duracion_semaforo': 5
 }
 

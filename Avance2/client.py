@@ -2,6 +2,7 @@ import json
 import uuid
 import requests as req
 
+
 class SimulationDatabase:
 
     def __init__(self):
@@ -99,56 +100,33 @@ class SimulationDatabase:
     def print(self):
         print(self.data)
 
+
 db = SimulationDatabase()
+
 
 class Client:
     def __init__(self, url=None):
-        
         self.url = url
 
     def add_car(self, id, pos):
-        global db
-
         db.add_car(pos[1], pos[0], 0, id)
-        req.post(self.url, data=db.string())
 
     def update_car(self, id, pos):
-        global db
-      
         db.update_car(id, pos[1], pos[0], 0)
-        r = req.post(self.url, data=db.string())
-        print(r.text)
-
-        return r.status_code
 
     def delete_car(self, id):
-        global db
-        
         db.delete_car(id)
-        r = req.post(self.url, data=db.string())
-        print(r.text)
-
-        return r.status_code
 
     def add_traffic_light(self, id, color, tag):
-        global db
-
         db.add_traffic_light(id, color, tag)
-        r = req.post(self.url, data=db.string())
-
-        return r.status_code
 
     def update_traffic_light(self, id, color):
-       
         db.update_traffic_light(id, color)
-        r = req.post(self.url, data=db.string())
-        print(r.text)
-
-        return r.status_code
 
     def delete_traffic_light(self, id):
-    
         db.delete_traffic_light(id)
+
+    def commit(self):
         r = req.post(self.url, data=db.string())
         print(r.text)
 
@@ -156,7 +134,6 @@ class Client:
 
 
 if __name__ == "__main__":
-    
     url = "https://testappagent.us-south.cf.appdomain.cloud/"
     cl = Client(url)
 
