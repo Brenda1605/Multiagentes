@@ -1,10 +1,10 @@
-# Sistemas Multiagentes 🚗🚦
+# Multiagent systems 🚗🚦
 
-**Repositorio para proyecto de "Modelación de sistemas multiagentes con gráficas computacionales"
+**Repository for the project "Modeling multi-agent systems with computational graphics"**
 
-Generación de una simulación de manera gráfica del tráfico de una ciudad, representando sistema multi agentes
+Generation of a graphical simulation of the traffic of a city, representing a multi-agent system.
 
-## Tecnologías y Conocimientos ⌨
+## Technologies and Knowledge ⌨
  
 - Python
 - IBM Cloud
